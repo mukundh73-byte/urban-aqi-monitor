@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AEROWATCH URBAN | Centralized Air Quality & Environmental Policy Command</title>
+  <meta name="description" content="Centralized urban monitoring of AQI, PM2.5, PM10, NO2, SO2, and predictive pollution trends to support municipal environmental policy and public health protection.">
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet GIS Map Styles -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Core Application Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="header-bar">
+    <div class="logo-wrapper">
+      <div class="logo-icon">
+        <i class="fa-solid fa-wind" style="color: #fff;"></i>
+      </div>
+      <div>
+        <div class="brand-title">
+          AEROWATCH <span style="color: var(--accent-cyan);">URBAN</span>
+          <span class="brand-badge">Central CAAQMS</span>
+        </div>
+        <div class="brand-subtitle">Urban Environmental Policy & Public Health Telemetry Command</div>
+      </div>
+    </div>
+
+    <!-- Multi-City Urban Selector -->
+    <div class="header-center">
+      <div class="city-selector-container">
+        <button class="city-btn active" data-city="chennai" id="btn-city-chennai">
+          <i class="fa-solid fa-location-dot"></i> Chennai
+        </button>
+        <button class="city-btn" data-city="delhi" id="btn-city-delhi">
+          <i class="fa-solid fa-location-dot"></i> Delhi-NCR
+        </button>
+        <button class="city-btn" data-city="mumbai" id="btn-city-mumbai">
+          <i class="fa-solid fa-location-dot"></i> Mumbai
+        </button>
+        <button class="city-btn" data-city="bengaluru" id="btn-city-bengaluru">
+          <i class="fa-solid fa-location-dot"></i> Bengaluru
+        </button>
+      </div>
+    </div>
+
+    <!-- Telemetry Status & Action Buttons -->
+    <div class="header-right">
+      <div class="telemetry-status">
+        <span class="pulse-dot"></span>
+        <span>TELEMETRY LIVE</span>
+        <span id="header-clock" style="color: var(--text-muted); margin-left: 4px;">18:24:00</span>
+      </div>
+      <button class="btn-header" id="btn-export-csv" title="Download raw sensor telemetry in CSV format">
+        <i class="fa-solid fa-file-csv"></i> CSV
+      </button>
+      <button class="btn-header btn-primary" id="btn-export-report" title="Generate printable executive municipal bulletin">
+        <i class="fa-solid fa-file-shield"></i> Municipal Briefing
+      </button>
+    </div>
+  </header>
+
+  <!-- Live Emergency & Policy Action Marquee -->
+  <div class="alert-ticker">
+    <div class="ticker-label">
+      <i class="fa-solid fa-triangle-exclamation"></i> POLICY BULLETIN:
+    </div>
+    <div class="ticker-content" id="alert-ticker-text">
+      GRAP Level-2 surveillance active across industrial clusters • Heavy commercial vehicle restriction enforced in northern corridors • Water-mist cannons deployed at traffic bottlenecks • Real-time CAAQMS data synchronized with Central Pollution Control Board standards (NAAQS)
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="dashboard-container">
+
+    <!-- Active City Hero Header -->
+    <section class="city-hero">
+      <div class="city-meta">
+        <h1 id="hero-city-name">Chennai Metropolitan Area</h1>
+        <p id="hero-state-name">Tamil Nadu • Urban Environmental Command</p>
+      </div>
+      <div class="city-quick-stats">
+        <div class="meta-pill">
+          <span class="meta-label">Urban Population</span>
+          <span class="meta-value" id="hero-population">11.5 Million</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Monitoring Grid</span>
+          <span class="meta-value" id="hero-station-count">14 Active CAAQMS</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Ambient Weather</span>
+          <span class="meta-value" id="hero-weather"><i class="fa-solid fa-cloud-sun"></i> 31°C, 78%</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Dispersion Vector</span>
+          <span class="meta-value" id="hero-wind"><i class="fa-solid fa-wind"></i> 14 km/h SE</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Executive KPI Grid (AQI + Key Pollutants) -->
+    <section class="kpi-grid">
+      <!-- Composite AQI Card -->
+      <div class="kpi-card hero-aqi">
+        <div class="kpi-header">
+          <span class="kpi-title">Composite Air Quality Index</span>
+          <span class="kpi-tag" id="kpi-aqi-category" style="background: rgba(234, 179, 8, 0.2); color: #eab308;">Moderate</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-aqi-val">168</span>
+          <span class="kpi-unit">AQI (NAAQS)</span>
+        </div>
+        <div class="kpi-status-bar">
+          <div class="kpi-progress" id="kpi-aqi-progress" style="width: 34%; background: #eab308;"></div>
+        </div>
+        <div class="kpi-footer">
+          <span id="kpi-aqi-dominant">Dominant: PM2.5</span>
+          <span style="font-size: 0.68rem; color: var(--accent-cyan);">24h Moving Avg</span>
+        </div>
+      </div>
+
+      <!-- PM2.5 Card -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Fine Particulate (PM2.5)</span>
+          <span class="kpi-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">Respiratory</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-pm25-val">78.4</span>
+          <span class="kpi-unit">µg/m³</span>
+        </div>
+        <div class="kpi-status-bar">
+          <div class="kpi-progress" id="kpi-pm25-progress" style="width: 65%; background: #f87171;"></div>
+        </div>
+        <div class="kpi-footer">
+          <span id="kpi-pm25-deviation" style="color: #f87171;">31% above NAAQS</span>
+          <span class="kpi-trend trend-up" id="kpi-pm25-trend"><i class="fa-solid fa-arrow-trend-up"></i> +4.2%</span>
+        </div>
+      </div>
+
+      <!-- PM10 Card -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Coarse Particulate (PM10)</span>
+          <span class="kpi-tag" style="background: rgba(234, 179, 8, 0.15); color: #eab308;">Road & Dust</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-pm10-val">142.1</span>
+          <span class="kpi-unit">µg/m³</span>
+        </div>
+        <div class="kpi-status-bar">
+          <div class="kpi-progress" id="kpi-pm10-progress" style="width: 71%; background: #f87171;"></div>
+        </div>
+        <div class="kpi-footer">
+          <span id="kpi-pm10-deviation" style="color: #f87171;">42% above NAAQS</span>
+          <span class="kpi-trend trend-up" id="kpi-pm10-trend"><i class="fa-solid fa-arrow-trend-up"></i> +2.1%</span>
+        </div>
+      </div>
+
+      <!-- NO2 Card -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Nitrogen Dioxide (NO₂)</span>
+          <span class="kpi-tag" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">Vehicular</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-no2-val">58.7</span>
+          <span class="kpi-unit">µg/m³</span>
+        </div>
+        <div class="kpi-status-bar">
+          <div class="kpi-progress" id="kpi-no2-progress" style="width: 36%; background: #10b981;"></div>
+        </div>
+        <div class="kpi-footer">
+          <span id="kpi-no2-deviation" style="color: #34d399;">26% within NAAQS</span>
+          <span class="kpi-trend trend-down" id="kpi-no2-trend"><i class="fa-solid fa-arrow-trend-down"></i> -1.5%</span>
+        </div>
+      </div>
+
+      <!-- SO2 Card -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Sulfur Dioxide (SO₂)</span>
+          <span class="kpi-tag" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">Industrial</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-so2-val">44.2</span>
+          <span class="kpi-unit">µg/m³</span>
+        </div>
+        <div class="kpi-status-bar">
+          <div class="kpi-progress" id="kpi-so2-progress" style="width: 27%; background: #10b981;"></div>
+        </div>
+        <div class="kpi-footer">
+          <span id="kpi-so2-deviation" style="color: #34d399;">45% within NAAQS</span>
+          <span class="kpi-trend trend-up" id="kpi-so2-trend"><i class="fa-solid fa-arrow-trend-up"></i> +8.9%</span>
+        </div>
+      </div>
+
+      <!-- Public Health Threat Index Card -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Public Health Threat</span>
+          <span class="kpi-tag" id="kpi-health-badge" style="background: rgba(234, 179, 8, 0.15); color: #eab308;">Advisory</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" style="font-size: 1.5rem; color: #fbbf24;" id="kpi-health-category">Moderate</span>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin: 0.4rem 0;">
+          Elevated cardiopulmonary strain for vulnerable cohorts.
+        </div>
+        <div class="kpi-footer">
+          <span>WHO Guidelines: 5x</span>
+          <span style="color: #38bdf8;"><i class="fa-solid fa-circle-info"></i> Health Stratified</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Section: Map + Predictive Charts -->
+    <section class="main-grid">
+      <!-- Geospatial Ward Map -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-map-location-dot" style="color: var(--accent-cyan);"></i>
+            Geospatial Ward Telemetry & Dispersion Map
+          </div>
+          <div class="panel-controls">
+            <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 4px;">Metric:</span>
+            <div class="map-filters" style="display: flex; gap: 4px;">
+              <button class="filter-chip active" data-filter="aqi">AQI</button>
+              <button class="filter-chip" data-filter="pm25">PM2.5</button>
+              <button class="filter-chip" data-filter="pm10">PM10</button>
+              <button class="filter-chip" data-filter="no2">NO₂</button>
+              <button class="filter-chip" data-filter="so2">SO₂</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-container">
+          <div id="urban-map"></div>
+
+          <!-- Floating Map Legend Panel -->
+          <div class="map-floating-panel">
+            <div class="map-legend">
+              <div class="legend-title">National Air Quality Index (NAAQS Spectrum)</div>
+              <div class="legend-scale">
+                <div class="scale-segment" style="background: #10b981;" title="Good (0-50)"></div>
+                <div class="scale-segment" style="background: #84cc16;" title="Satisfactory (51-100)"></div>
+                <div class="scale-segment" style="background: #eab308;" title="Moderate (101-200)"></div>
+                <div class="scale-segment" style="background: #f97316;" title="Poor (201-300)"></div>
+                <div class="scale-segment" style="background: #ef4444;" title="Very Poor (301-400)"></div>
+                <div class="scale-segment" style="background: #991b1b;" title="Severe (401-500)"></div>
+              </div>
+              <div class="legend-labels">
+                <span>0 Good</span>
+                <span>100 Mod</span>
+                <span>200 Poor</span>
+                <span>300 V.Poor</span>
+                <span>500+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry Trend & Predictive Analytics -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-chart-line" style="color: var(--accent-emerald);"></i>
+            Pollution Trends & AI Trajectory Forecasting
+          </div>
+          <div class="panel-controls">
+            <div class="btn-toggle-group">
+              <button class="btn-toggle btn-chart-mode active" data-mode="pollutants">Multi-Pollutant</button>
+              <button class="btn-toggle btn-chart-mode" data-mode="aqi">AQI 24h</button>
+              <button class="btn-toggle btn-chart-mode" data-mode="forecast">72h AI Forecast</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <!-- Main Trend Line Chart -->
+          <div class="chart-wrapper">
+            <div class="chart-title-bar">
+              <span class="chart-title">Continuous Ambient Telemetry Progression</span>
+              <span style="font-size: 0.68rem; color: var(--accent-cyan); font-family: var(--font-mono);">
+                <i class="fa-solid fa-bolt"></i> Calibrated Sensors
+              </span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Source Apportionment Doughnut Chart -->
+          <div class="chart-wrapper">
+            <div class="chart-title-bar">
+              <span class="chart-title">Urban Emission Source Apportionment</span>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Receptor Model Synthesis</span>
+            </div>
+            <div class="chart-canvas-container" style="height: 160px;">
+              <canvas id="sourceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Environmental Policy & Public Health Section (Two-Columns) -->
+    <section class="policy-grid">
+      <!-- Environmental Policy Command & Impact Simulator -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--accent-amber);"></i>
+            Environmental Policy Command & Decision Support
+          </div>
+          <span style="font-size: 0.72rem; color: var(--accent-amber); font-weight: 600;">
+            <i class="fa-solid fa-gavel"></i> Statutory Mandates
+          </span>
+        </div>
+
+        <div style="padding: 1.2rem;">
+          <!-- GRAP Stage Checklist (Dynamic) -->
+          <div id="policy-stage-container"></div>
+
+          <!-- Policy Impact Sandbox / Simulator -->
+          <div class="simulator-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h4 style="margin: 0; font-size: 0.88rem; color: #fff;">
+                <i class="fa-solid fa-sliders" style="color: var(--accent-cyan); margin-right: 6px;"></i>
+                Policy Intervention Impact Simulator
+              </h4>
+              <span style="font-size: 0.7rem; color: var(--text-dim);">Real-Time Micro-Atmospheric Projection</span>
+            </div>
+
+            <!-- Slider 1: Traffic Restriction -->
+            <div class="sim-slider-row">
+              <div class="slider-label-row">
+                <span>Vehicular Rationing & EV Priority (Odd-Even / Commercial Ban)</span>
+                <span id="sim-traffic-val">20%</span>
+              </div>
+              <input type="range" id="sim-traffic" min="0" max="50" step="5" value="20">
+            </div>
+
+            <!-- Slider 2: Construction Halt -->
+            <div class="sim-slider-row">
+              <div class="slider-label-row">
+                <span>Construction & Demolition Activity Moratorium</span>
+                <span id="sim-construction-val">40%</span>
+              </div>
+              <input type="range" id="sim-construction" min="0" max="100" step="10" value="40">
+            </div>
+
+            <!-- Slider 3: Industrial Transition -->
+            <div class="sim-slider-row">
+              <div class="slider-label-row">
+                <span>Industrial Switch to PNG / Operating Shift Curtailment</span>
+                <span id="sim-industry-val">30%</span>
+              </div>
+              <input type="range" id="sim-industry" min="0" max="100" step="10" value="30">
+            </div>
+
+            <!-- Slider 4: Water Mist Cannons -->
+            <div class="sim-slider-row">
+              <div class="slider-label-row">
+                <span>Mechanized Water Mist Cannons & Anti-Smog Guns</span>
+                <span id="sim-mist-val">50%</span>
+              </div>
+              <input type="range" id="sim-mist" min="0" max="100" step="10" value="50">
+            </div>
+
+            <!-- Simulated Outcome -->
+            <div class="sim-impact-result">
+              <div>
+                <div class="sim-impact-text">Projected AQI After Targeted Intervention</div>
+                <div style="font-size: 0.72rem; color: #6ee7b7; margin-top: 2px;">
+                  Expected Reduction: <strong id="sim-aqi-drop">-32 pts (-19%)</strong>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div class="sim-impact-value" id="sim-aqi-result">136</div>
+                <div style="font-size: 0.68rem; color: #a7f3d0;" id="sim-hospital-admissions">142 cases / week averted</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Public Health Advisory & Protection Center -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-hospital-user" style="color: var(--accent-rose);"></i>
+            Public Health Protection & Stratified Advisories
+          </div>
+          <span style="font-size: 0.72rem; color: var(--accent-rose); font-weight: 600;">
+            <i class="fa-solid fa-heart-pulse"></i> Epidemiological Risk
+          </span>
+        </div>
+
+        <div style="padding: 1.2rem;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Automated health advisories generated based on localized pollutant concentrations (PM2.5, NO₂, SO₂) 
+            and meteorological thermal inversion indices.
+          </p>
+
+          <!-- Dynamic Health Guidance Cards -->
+          <div id="health-guidance-container"></div>
+
+          <!-- Exposure Vulnerability Table & Hospital Alert Network -->
+          <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.82rem; font-weight: 600; color: #fff;">
+                <i class="fa-solid fa-truck-medical" style="color: var(--accent-cyan); margin-right: 6px;"></i>
+                Municipal Emergency & Hospital Preparedness
+              </span>
+              <span style="font-size: 0.68rem; color: var(--accent-emerald); font-weight: 600;">STANDBY ACTIVE</span>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.5;">
+              District emergency wards have been notified to replenish oxygen cylinders, nebulizers, and pediatric bronchodilators in anticipation of peak morning smog concentrations.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ward Telemetry Data Table Section -->
+    <section class="panel-card table-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i class="fa-solid fa-table-list" style="color: var(--accent-cyan);"></i>
+          Continuous Ambient Air Quality Monitoring Stations (CAAQMS) Telemetry
+        </div>
+        <div class="panel-controls">
+          <div style="position: relative;">
+            <input type="text" id="station-search" placeholder="Search ward / station..." 
+              style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); color: #fff; padding: 5px 12px 5px 28px; border-radius: var(--radius-sm); font-size: 0.75rem; width: 200px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 9px; top: 8px; font-size: 0.7rem; color: var(--text-dim);"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="telemetry-table">
+          <thead>
+            <tr>
+              <th>Monitoring Station / Ward</th>
+              <th>Zone Classification</th>
+              <th>Current AQI</th>
+              <th>PM2.5 (µg/m³)</th>
+              <th>PM10 (µg/m³)</th>
+              <th>NO₂ (µg/m³)</th>
+              <th>SO₂ (µg/m³)</th>
+              <th>Sensor Status</th>
+              <th>Municipal Action</th>
+            </tr>
+          </thead>
+          <tbody id="telemetry-table-body">
+            <!-- Rendered dynamically by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <div>AEROWATCH URBAN • Centralized Air Quality Monitoring & Environmental Policy Command</div>
+      <div class="footer-credits">
+        Level 1 Engineering Project • <strong>B Mukundan</strong> (Reg No: 310624104611) • Urban Environmental Policy & Public Health System
+      </div>
+    </footer>
+  </main>
+
+  <!-- Modal Dialog for Executive Municipal Briefing -->
+  <div class="modal-overlay" id="export-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-file-shield" style="color: var(--accent-cyan); margin-right: 8px;"></i>
+          Executive Municipal Air Quality Briefing
+        </div>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-briefing-content">
+        <!-- Dynamically injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Application Logic Modules -->
+  <script src="js/data.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/policy.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
